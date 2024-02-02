@@ -22,25 +22,34 @@ namespace MaHakesherServerSide.Controllers
             _context = context;
         }
 
-
-        [HttpPost]
-        [ActionName("login")]
-        public IActionResult login([Bind("UserName, Password")] UserJson user)
-        {
-            int x = 7;
-            return Ok();
-        }
-
         private bool checkIfUserExists(string userName)
         {
-            var existsUserName =  _context.User.Where(m => m.UserName == userName);
-            if(existsUserName.Any())
+            var existsUserName = _context.User.Where(m => m.UserName == userName);
+            if (existsUserName.Any())
             {
                 return true;
             }
             return false;
 
         }
+
+        [HttpPost]
+        [ActionName("login")]
+        public IActionResult login([Bind("UserName, Password")] UserJson user)
+        {
+            if(!checkIfUserExists(user.UserName))
+            {
+                return NotFound();
+            }
+            var isUserNameAndPasswordCorrect = _context.User.Where(m => m.UserName == user.UserName && m.Password == user.Password);
+            if(isUserNameAndPasswordCorrect.Any())
+            {
+                return Ok();
+            }
+            return BadRequest();
+        }
+
+  
 
         [HttpPost]
         [ActionName("register")]
