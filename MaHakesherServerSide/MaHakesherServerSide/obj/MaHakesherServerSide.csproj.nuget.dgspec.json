@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\idota\\OneDrive\\Desktop\\לימודים\\שנה ד\\סדנה במסדי נתונים\\Server Side\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj": {}
+    "C:\\Users\\dabra\\Desktop\\לימודים\\שנה ד'\\סדנה במסדי נתונים\\Repos\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj": {}
   },
   "projects": {
-    "C:\\Users\\idota\\OneDrive\\Desktop\\לימודים\\שנה ד\\סדנה במסדי נתונים\\Server Side\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj": {
+    "C:\\Users\\dabra\\Desktop\\לימודים\\שנה ד'\\סדנה במסדי נתונים\\Repos\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\idota\\OneDrive\\Desktop\\לימודים\\שנה ד\\סדנה במסדי נתונים\\Server Side\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj",
+        "projectUniqueName": "C:\\Users\\dabra\\Desktop\\לימודים\\שנה ד'\\סדנה במסדי נתונים\\Repos\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj",
         "projectName": "MaHakesherServerSide",
-        "projectPath": "C:\\Users\\idota\\OneDrive\\Desktop\\לימודים\\שנה ד\\סדנה במסדי נתונים\\Server Side\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj",
-        "packagesPath": "C:\\Users\\idota\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\idota\\OneDrive\\Desktop\\לימודים\\שנה ד\\סדנה במסדי נתונים\\Server Side\\MaHakesherServerSide\\MaHakesherServerSide\\obj\\",
+        "projectPath": "C:\\Users\\dabra\\Desktop\\לימודים\\שנה ד'\\סדנה במסדי נתונים\\Repos\\MaHakesherServerSide\\MaHakesherServerSide\\MaHakesherServerSide.csproj",
+        "packagesPath": "C:\\Users\\dabra\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\dabra\\Desktop\\לימודים\\שנה ד'\\סדנה במסדי נתונים\\Repos\\MaHakesherServerSide\\MaHakesherServerSide\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\idota\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\dabra\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\sdk\\7.0.304\\Sdks\\Microsoft.NET.Sdk.Web\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -53,6 +54,10 @@
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[6.0.16, )"
+            },
+            "MySqlConnector": {
+              "target": "Package",
+              "version": "[2.3.5, )"
             }
           },
           "imports": [
@@ -74,7 +79,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.203\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.304\\RuntimeIdentifierGraph.json"
         }
       }
     }

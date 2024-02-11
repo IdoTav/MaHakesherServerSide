@@ -1,13 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MaHakesherServerSide.Data;
+using MySqlConnector;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MaHakesherServerSideContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MaHakesherServerSideContext") ?? throw new InvalidOperationException("Connection string 'MaHakesherServerSideContext' not found.")));
 
 
+builder.Services.AddTransient<MySqlConnection>(_ =>
+    new MySqlConnection(builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'Default' not found.")));
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 
 builder.Services.AddCors(options =>
 {

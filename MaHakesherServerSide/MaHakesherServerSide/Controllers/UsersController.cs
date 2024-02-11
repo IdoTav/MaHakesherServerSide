@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using MaHakesherServerSide.Data;
 using MaHakesherServerSide.Models;
 using MaHakesherServerSide.JsonClasses;
+using MySqlConnector;
+using System.Linq.Expressions;
 
 namespace MaHakesherServerSide.Controllers
 {
@@ -16,14 +16,34 @@ namespace MaHakesherServerSide.Controllers
     public class UsersController : Controller
     {
         private readonly MaHakesherServerSideContext _context;
+        private readonly MySqlConnection _connection;
 
-        public UsersController(MaHakesherServerSideContext context)
+        public UsersController(MaHakesherServerSideContext context, MySqlConnection connection)
         {
             _context = context;
+            _connection = connection;
         }
 
-        private bool checkIfUserExists(string userName)
+        private async Task<bool> checkIfUserExistsAsync(string userName)
         {
+            // An example for how to use MySQL server
+/*            try
+            {
+                await _connection.OpenAsync();
+
+                using var command = new MySqlCommand("SELECT * FROM mahakesher.book;", _connection);
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var value = reader.GetValue(0);
+                    // do something with 'value'
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex.Message);
+            }*/
+
             var existsUserName = _context.User.Where(m => m.UserName == userName);
             if (existsUserName.Any())
             {
@@ -35,9 +55,9 @@ namespace MaHakesherServerSide.Controllers
 
         [HttpPost]
         [ActionName("login")]
-        public IActionResult login([Bind("UserName, Password")] UserJson user)
+        public async Task<IActionResult> loginAsync([Bind("UserName, Password")] UserJson user)
         {
-            if(!checkIfUserExists(user.UserName))
+            if(! await checkIfUserExistsAsync(user.UserName))
             {
                 return NotFound();
             }
@@ -53,9 +73,9 @@ namespace MaHakesherServerSide.Controllers
 
         [HttpPost]
         [ActionName("register")]
-        public IActionResult register([Bind("UserName, Password")] UserJson user)
+        public async Task<IActionResult> registerAsync([Bind("UserName, Password")] UserJson user)
         {
-            if(checkIfUserExists(user.UserName))
+            if(await checkIfUserExistsAsync(user.UserName))
             {
                 return BadRequest();
             }
