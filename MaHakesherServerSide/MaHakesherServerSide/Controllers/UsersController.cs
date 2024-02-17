@@ -27,22 +27,9 @@ namespace MaHakesherServerSide.Controllers
         private async Task<bool> checkIfUserExistsAsync(string userName)
         {
             // An example for how to use MySQL server
-/*            try
-            {
-                await _connection.OpenAsync();
+/*            ConnectionsController connectionsController = new ConnectionsController(_connection);
+            var books = await connectionsController.GetPeopleThatMentionsInPersonLifeTime("Adam_1");*/
 
-                using var command = new MySqlCommand("SELECT * FROM mahakesher.book;", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var value = reader.GetValue(0);
-                    // do something with 'value'
-                }
-            }
-            catch(Exception ex)
-            {
-                Console.Write(ex.Message);
-            }*/
 
             var existsUserName = _context.User.Where(m => m.UserName == userName);
             if (existsUserName.Any())
