@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using MaHakesherServerSide.Data;
 using MaHakesherServerSide.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using Newtonsoft.Json.Linq;
@@ -27,6 +28,7 @@ namespace MaHakesherServerSide.Controllers
             List<string> booksList = new List<string>();
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"USE mahakesher; " +
                     $"SELECT DISTINCT  r.usx_code " +
@@ -57,6 +59,7 @@ namespace MaHakesherServerSide.Controllers
             Dictionary<string, string> relationsDictionary = new Dictionary<string, string>();
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"USE mahakesher; " +
                     $"SELECT person_id_1 AS other_person, relationship_type " +
@@ -85,6 +88,7 @@ namespace MaHakesherServerSide.Controllers
             List<string> personsList = new List<string>();
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"WITH NameReference AS ( " +
                                                      $"  SELECT DISTINCT " +
@@ -123,6 +127,7 @@ namespace MaHakesherServerSide.Controllers
             }
             catch (Exception ex)
             {
+                await _connection.CloseAsync();
                 Console.Write(ex.Message);
             }
             return null;
@@ -133,6 +138,7 @@ namespace MaHakesherServerSide.Controllers
             Dictionary<string, string> relationsDictionary = new Dictionary<string, string>();
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT person_id, " +
                                                      $"GROUP_CONCAT(DISTINCT reference_id ORDER BY reference_id ASC SEPARATOR ', ') AS concatenated_reference_ids " +
@@ -205,6 +211,51 @@ namespace MaHakesherServerSide.Controllers
             return playDictionary;
         }
 
+        public async Task<Dictionary<string, string>> GetOptions([FromQuery] string personId)
+        {
+            Dictionary<string, string>? connections = new Dictionary<string, string>();
+            string primaryPersonName = await GetNameFromPersonId(personId);
+
+            Dictionary<string, string>? relations = await GetRelations(personId);
+            if (relations != null)
+            {
+                foreach (KeyValuePair<string, string> person in relations)
+                {
+                    if (!connections.ContainsKey(person.Key))
+                    {
+                        connections.Add(person.Key, $"The {person.Value} of {primaryPersonName}");
+                    }
+                }
+            }
+
+            List<string>? mentionInPersonLifeTime = await GetPeopleThatMentionsInPersonLifeTime(personId);
+            mentionInPersonLifeTime.ForEach((person) =>
+            {
+                if (!connections.ContainsKey(person))
+                {
+                    connections.Add(person, $"Mentioned in {primaryPersonName} life time");
+                }
+            });
+            
+            Dictionary<string, string>? mentionInSameVerse = await GetPeopleThatMentionInTheSameVerse(personId);
+            if (mentionInSameVerse != null)
+            {
+                    foreach (KeyValuePair<string, string> person in mentionInSameVerse)
+                    {
+                        if (!connections.ContainsKey(person.Key))
+                        {
+                            connections.Add(person.Key, $"Mentioned together in verses: {person.Value}");
+                        }
+                    }
+            }
+
+            if (connections.ContainsKey(NAME_OF_GOD))
+            {
+                connections.Remove(NAME_OF_GOD);
+            }
+            return connections;
+        }
+
         private async Task<KeyValuePair<string, string>?> NextLevel(string personId)
         {
             Random random = new Random();
@@ -252,10 +303,11 @@ namespace MaHakesherServerSide.Controllers
             string? personName = null;
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
-                using var command = new MySqlCommand($"SELECT person_name" +
-                    $"FROM mahakesher.person" +
-                    $"WHERE person_name = {personId}", _connection);
+                using var command = new MySqlCommand($"SELECT person_name " +
+                    $"FROM mahakesher.person " +
+                    $"WHERE person_id = '{personId}'", _connection);
                 using var reader = await command.ExecuteReaderAsync();
                 if (reader.Read())
                 {
@@ -293,6 +345,7 @@ namespace MaHakesherServerSide.Controllers
         {
             try
             {
+                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT {columnName} FROM {tableName} ORDER BY RAND ( )  LIMIT 1;", _connection);
                 using var reader = await command.ExecuteReaderAsync();
