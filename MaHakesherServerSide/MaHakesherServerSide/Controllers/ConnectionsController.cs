@@ -84,7 +84,7 @@ namespace MaHakesherServerSide.Controllers
             return null;
         }
 
-        public async Task<List<string>?> GetPeopleThatMentionsInPersonLifeTime(string person)
+        public async Task<List<string>?> GetPeopleThatMentionsInPersonLifeTime(string personId)
         {
             List<string> personsList = new List<string>();
             try
@@ -106,7 +106,7 @@ namespace MaHakesherServerSide.Controllers
                                                      $"    ) AS end_value" +
                                                      $"  FROM mahakesher.epoch e" +
                                                      $"  JOIN mahakesher.person_verse pv ON e.person_id = pv.person_id" +
-                                                     $"  WHERE pv.person_id = '{person}' " +
+                                                     $"  WHERE pv.person_id = '{personId}' " +
                                                      $"  GROUP BY pv.person_id) " +
                                                      $", ReferenceRange AS( " +
                                                      $"  SELECT reference_id" +
@@ -116,7 +116,7 @@ namespace MaHakesherServerSide.Controllers
                                                      $"SELECT DISTINCT pv.person_id " +
                                                      $"FROM mahakesher.person_verse pv " +
                                                      $"INNER JOIN ReferenceRange rr ON pv.reference_id = rr.reference_id " +
-                                                     $"WHERE pv.person_id<> '{person}'; ", _connection);
+                                                     $"WHERE pv.person_id<> '{personId}'; ", _connection);
                 using var reader = await command.ExecuteReaderAsync();
                 while (reader.Read())
                 {
@@ -147,9 +147,9 @@ namespace MaHakesherServerSide.Controllers
                                                      $"WHERE reference_id IN( " +
                                                      $"SELECT reference_id " +
                                                      $"FROM mahakesher.person_verse " +
-                                                     $"WHERE person_id = 'Hezron_2') " +
-                                                     $"AND person_id<> 'Hezron_2' " +
-                                                     $"AND person_id<> 'Yhvh_1' " +
+                                                     $"WHERE person_id = '{person}') " +
+                                                     $"AND person_id<> '{person}' " +
+                                                     $"AND person_id<> '{NAME_OF_GOD}' " +
                                                      $"GROUP BY person_id;", _connection);
                 using var reader = await command.ExecuteReaderAsync();
                 while (reader.Read())
