@@ -4,6 +4,7 @@ using MaHakesherServerSide.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Text.RegularExpressions;
@@ -176,7 +177,7 @@ namespace MaHakesherServerSide.Controllers
 
             Dictionary<string, string> playDictionary = new Dictionary<string, string>();
             string person = await GetRandomPersonId();
-            playDictionary.Add(person, "Start");
+            playDictionary.Add(person, $"Start $$${await GetGenderFromPersonId(person)}");
 
             List<string> personsInRoad = new List<string>(); 
             personsInRoad.Add(person);
@@ -204,7 +205,7 @@ namespace MaHakesherServerSide.Controllers
                         continue;
                     }
                     personsInRoad.Add(optionPerson);
-                    playDictionary.Add(optionPerson, keyValuePair.Value.Value);
+                    playDictionary.Add(optionPerson, keyValuePair.Value.Value + $"$$${await GetGenderFromPersonId(optionPerson)}");
                     nextPerson = optionPerson;
                 }
             }
@@ -215,7 +216,6 @@ namespace MaHakesherServerSide.Controllers
         {
             Dictionary<string, string>? connections = new Dictionary<string, string>();
             string primaryPersonName = await GetNameFromPersonId(personId);
-
             Dictionary<string, string>? relations = await GetRelations(personId);
             if (relations != null)
             {
@@ -223,17 +223,17 @@ namespace MaHakesherServerSide.Controllers
                 {
                     if (!connections.ContainsKey(person.Key))
                     {
-                        connections.Add(person.Key, $"The {person.Value} of {primaryPersonName}");
+                        connections.Add(person.Key, $"The {person.Value} of {primaryPersonName} $$${await GetGenderFromPersonId(person.Key)}");
                     }
                 }
             }
 
             List<string>? mentionInPersonLifeTime = await GetPeopleThatMentionsInPersonLifeTime(personId);
-            mentionInPersonLifeTime.ForEach((person) =>
+            mentionInPersonLifeTime.ForEach(async (person) =>
             {
                 if (!connections.ContainsKey(person))
                 {
-                    connections.Add(person, $"Mentioned in {primaryPersonName} life time");
+                    connections.Add(person, $"Mentioned in {primaryPersonName} life time $$${await GetGenderFromPersonId(person)}");
                 }
             });
             
@@ -244,7 +244,7 @@ namespace MaHakesherServerSide.Controllers
                     {
                         if (!connections.ContainsKey(person.Key))
                         {
-                            connections.Add(person.Key, $"Mentioned together in verses: {person.Value}");
+                            connections.Add(person.Key, $"Mentioned together in verses: {person.Value} $$${await GetGenderFromPersonId(person.Key)}");
                         }
                     }
             }
@@ -297,6 +297,35 @@ namespace MaHakesherServerSide.Controllers
             }
         }
 
+        private async Task<string> GetGenderFromPersonId(string personId)
+        {
+            string? personGender = null;
+            try
+            {
+                await _connection.CloseAsync();
+                await _connection.OpenAsync();
+                using var command = new MySqlCommand($"SELECT sex " +
+                   $"FROM mahakesher.person " +
+                   $"WHERE person_id = '{personId}'", _connection);
+                using var reader = await command.ExecuteReaderAsync();
+                if(reader.Read())
+                {
+                    var value = reader.GetValue(0);
+                    personGender = value.ToString();
+                }
+                await _connection.CloseAsync();
+                if (string.IsNullOrEmpty(personGender))
+                {
+                    throw new Exception($"Problem in getting person gender for {personId}");
+                }
+                return personGender;
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
+            return string.Empty;
+        }
 
         private async Task<string> GetNameFromPersonId(string personId)
         {
