@@ -5,14 +5,15 @@ namespace MaHakesherServerSide.Models
 {
     public class Relations
     {
+        public Relations(string userName, string history)
+        {
+            this.UserName = userName;
+            this.History = history;
+        }
+
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public string UserName { get; set; }
 
-        [Required]
-        public string Source { get; set; }
-
-        [Required]
-        public string Destination { get; set; }
+        public string History { get; set; }
     }
 }

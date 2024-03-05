@@ -7,7 +7,6 @@ namespace MaHakesherServerSide.Models
         {
             this.UserName = userName;
             this.Password = password;
-            this.SourceAndDest = new List<Relations>();
         }
 
         [Key]
@@ -15,8 +14,6 @@ namespace MaHakesherServerSide.Models
 
         [Required]
         public string Password { get; set; }
-
-        public List<Relations>? SourceAndDest { get; set; } 
 
     }
 }

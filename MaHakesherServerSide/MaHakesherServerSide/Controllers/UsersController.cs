@@ -55,7 +55,36 @@ namespace MaHakesherServerSide.Controllers
             }
             return BadRequest();
         }
+        
+        [HttpGet]
+        [ActionName("history")]
+        public async Task<IActionResult> getHistory([FromQuery] string userName)
+        {
+            var history = _context.Relations.Find(userName);
+            if (history != null)
+            {
+                return Ok(history.History);
+            }
+            return NotFound();
+        }
 
+        [HttpPost]
+        [ActionName("history")]
+        public async Task<IActionResult> history([Bind("UserName, History")] Relations relation)
+        {
+            var history = _context.Relations.Find(relation.UserName);
+            if(history != null)
+            {
+                history.History = history.History + "$$" + relation.History;
+                _context.SaveChanges();
+                return Ok(200);
+            }
+            Relations relations = new Relations(relation.UserName, relation.History);
+            _context.Add(relations);
+            _context.SaveChanges();
+            return Ok(200);
+        }
+        
   
 
         [HttpPost]
