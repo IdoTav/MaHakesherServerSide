@@ -124,7 +124,7 @@ namespace MaHakesherServerSide.Controllers
                     personsList.Add(value.ToString());
                 }
                 await _connection.CloseAsync();
-                return personsList;
+                כreturn personsList;
             }
             catch (Exception ex)
             {
@@ -208,6 +208,10 @@ namespace MaHakesherServerSide.Controllers
                     playDictionary.Add(optionPerson, keyValuePair.Value.Value + $"$$${await GetGenderFromPersonId(optionPerson)}");
                     nextPerson = optionPerson;
                 }
+            }
+            if (playDictionary.Count >= 6)
+            {
+                return playDictionary.Take(5).ToDictionary(pair=>pair.Key, pair=>pair.Value);
             }
             return playDictionary;
         }
