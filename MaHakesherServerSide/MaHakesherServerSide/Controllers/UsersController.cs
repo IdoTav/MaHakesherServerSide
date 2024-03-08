@@ -10,11 +10,15 @@ using MySqlConnector;
 using System.Linq.Expressions;
 
 namespace MaHakesherServerSide.Controllers
-{
+{ 
     [ApiController]
     [Route("api/[controller]/[action]")]
     public class UsersController : Controller
     {
+        private readonly string PASSWORD = "123456";
+        private readonly bool USERS_ALREADY_GENERATED = false;
+
+
         private readonly MaHakesherServerSideContext _context;
         private readonly MySqlConnection _connection;
 
@@ -26,11 +30,6 @@ namespace MaHakesherServerSide.Controllers
 
         private async Task<bool> checkIfUserExistsAsync(string userName)
         {
-            // An example for how to use MySQL server
-/*            ConnectionsController connectionsController = new ConnectionsController(_connection);
-            var books = await connectionsController.GetPeopleThatMentionsInPersonLifeTime("Adam_1");*/
-
-
             var existsUserName = _context.User.Where(m => m.UserName == userName);
             if (existsUserName.Any())
             {
@@ -44,6 +43,16 @@ namespace MaHakesherServerSide.Controllers
         [ActionName("login")]
         public async Task<IActionResult> loginAsync([Bind("UserName, Password")] UserJson user)
         {
+            if (!USERS_ALREADY_GENERATED)
+            {
+                try {
+                    await GenerateUsers();
+                } catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+                
+            }
             if(! await checkIfUserExistsAsync(user.UserName))
             {
                 return NotFound();
@@ -100,6 +109,37 @@ namespace MaHakesherServerSide.Controllers
             _context.SaveChanges();
             return Ok();
 
+        }
+
+        private async Task GenerateUsers()
+        {
+            List<string> names = new List<string>
+            {
+                "Avigail", "Ariel", "Batya", "Daniel", "Hannah", "Itamar", "Maya", "Noam", "Rachel", "Shimon",
+                "Yael", "Eitan", "Tamar", "Oren", "Ruth", "Yitzhak", "Sara", "Aviv", "Leah", "Eli",
+                "Shira", "Yosef", "Miri", "Adam", "Dina", "Amir", "Rivka", "Yonatan", "Orli", "Ariella",
+                "Moshe", "Tali", "Yehuda", "Yifat", "Uri", "Gila", "Ezra", "Nava", "Ephraim", "Yona",
+                "Tzipporah", "Matan", "Yochanan", "Yaeli", "Netanel", "Penina", "Eliezer", "Zahava", "Nathan", "Tova",
+                "Yair", "Esther", "Oded", "Avital", "Boaz", "Ilana", "Elad", "Chava", "Ido", "Shoshana",
+                "Yarden", "Dov", "Nechama", "Yaniv", "Aviva", "Gideon", "Rina", "Yoav", "Eden", "Chaim",
+                "Orit", "Ephrat", "Mordechai", "Talia", "Haim", "Linoy", "Shlomo", "Vered", "Lior", "Ziva",
+                "Erez", "Adina", "Zvi", "Nina", "Yotam", "Yaelle", "Nimrod", "Ayelet", "Israel", "Atara",
+                "Yehudit", "Meir", "Tzipora", "Shai", "Yiska", "Hadar", "Ilan", "Tal", "Eliran", "Tirza"
+            };
+            names.ForEach((name) =>
+            {
+                User newUser = new User(name, PASSWORD);
+                try {
+                    _context.Add(newUser);
+                }
+                catch (Exception ex)
+                {
+                    int a = 5;
+                }
+
+            });
+            await _context.SaveChangesAsync();
+            return;
         }
     }
 }

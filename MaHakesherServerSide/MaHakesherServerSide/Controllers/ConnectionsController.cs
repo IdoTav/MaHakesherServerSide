@@ -124,7 +124,7 @@ namespace MaHakesherServerSide.Controllers
                     personsList.Add(value.ToString());
                 }
                 await _connection.CloseAsync();
-                כreturn personsList;
+                return personsList;
             }
             catch (Exception ex)
             {
