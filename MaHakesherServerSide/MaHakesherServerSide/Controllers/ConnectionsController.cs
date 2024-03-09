@@ -1,13 +1,6 @@
-﻿using Humanizer;
-using MaHakesherServerSide.Data;
-using MaHakesherServerSide.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Text.RegularExpressions;
+
 
 namespace MaHakesherServerSide.Controllers
 {
@@ -24,62 +17,39 @@ namespace MaHakesherServerSide.Controllers
             _connection = connection;
         }
 
-        public async Task<List<string>?> GetBooksPersonAppear(string name)
-        {
-            List<string> booksList = new List<string>();
-            try
-            {
-                await _connection.CloseAsync();
-                await _connection.OpenAsync();
-                using var command = new MySqlCommand($"USE mahakesher; " +
-                    $"SELECT DISTINCT  r.usx_code " +
-                    $"FROM mahakesher.person_verse p " +
-                    $"JOIN mahakesher.bibledata_reference r ON p.reference_id = r.reference_id " +
-                    $"WHERE p.person_id IN( " +
-                    $"SELECT person_id " +
-                    $"FROM mahakesher.person_verse " +
-                    $"WHERE person_id = '{name}' );", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var value = reader.GetValue(0);
-                    booksList.Add(value.ToString());
-                }
-                await _connection.CloseAsync();
-                return booksList;
-            }
-            catch (Exception ex)
-            {
-                Console.Write(ex.Message);
-            }
-            return null;
-        }
-
         public async Task<Dictionary<string, string>?> GetRelations(string name)
         {
             Dictionary<string, string> relationsDictionary = new Dictionary<string, string>();
             try
             {
-                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"USE mahakesher; " +
                     $"SELECT person_id_1 AS other_person, relationship_type " +
                     $"FROM mahakesher.relationship " +
                     $"WHERE person_id_2 ='{name}';", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    string personId2 = reader["other_person"].ToString();
-                    string relationshipType = reader["relationship_type"].ToString();
+                    while (reader.Read())
+                    {
+                        string personId2 = reader["other_person"].ToString();
+                        string relationshipType = reader["relationship_type"].ToString();
 
-                    relationsDictionary.Add(personId2, relationshipType);
+                        relationsDictionary.Add(personId2, relationshipType);
+                    }
+                    if (relationsDictionary.ContainsKey(NAME_OF_GOD))
+                    {
+                        relationsDictionary.Remove(NAME_OF_GOD);
+                    }
                 }
-                await _connection.CloseAsync();
                 return relationsDictionary;
             }
             catch (Exception ex)
             {
                 Console.Write(ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
             }
             return null;
         }
@@ -89,7 +59,6 @@ namespace MaHakesherServerSide.Controllers
             List<string> personsList = new List<string>();
             try
             {
-                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"WITH NameReference AS ( " +
                                                      $"  SELECT DISTINCT " +
@@ -117,19 +86,23 @@ namespace MaHakesherServerSide.Controllers
                                                      $"FROM mahakesher.person_verse pv " +
                                                      $"INNER JOIN ReferenceRange rr ON pv.reference_id = rr.reference_id " +
                                                      $"WHERE pv.person_id<> '{personId}'; ", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    var value = reader.GetValue(0);
-                    personsList.Add(value.ToString());
+                    while (reader.Read())
+                    {
+                        var value = reader.GetValue(0);
+                        personsList.Add(value.ToString());
+                    }
                 }
-                await _connection.CloseAsync();
                 return personsList;
             }
             catch (Exception ex)
             {
-                await _connection.CloseAsync();
                 Console.Write(ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
             }
             return null;
         }
@@ -139,7 +112,6 @@ namespace MaHakesherServerSide.Controllers
             Dictionary<string, string> relationsDictionary = new Dictionary<string, string>();
             try
             {
-                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT person_id, " +
                                                      $"GROUP_CONCAT(DISTINCT reference_id ORDER BY reference_id ASC SEPARATOR ', ') AS concatenated_reference_ids " +
@@ -151,21 +123,25 @@ namespace MaHakesherServerSide.Controllers
                                                      $"AND person_id<> '{person}' " +
                                                      $"AND person_id<> '{NAME_OF_GOD}' " +
                                                      $"GROUP BY person_id;", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                while (reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    string personId = reader["person_id"].ToString();
-                    string verses = reader["concatenated_reference_ids"].ToString();
+                    while (reader.Read())
+                    {
+                        string personId = reader["person_id"].ToString();
+                        string verses = reader["concatenated_reference_ids"].ToString();
 
-                    relationsDictionary.Add(personId, verses);
+                        relationsDictionary.Add(personId, verses);
+                    }
                 }
-                await _connection.CloseAsync();
                 return relationsDictionary;
             }
             catch (Exception ex)
             {
-                await _connection.CloseAsync();
                 Console.Write(ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
             }
             return null;
         }
@@ -306,18 +282,18 @@ namespace MaHakesherServerSide.Controllers
             string? personGender = null;
             try
             {
-                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT sex " +
                    $"FROM mahakesher.person " +
                    $"WHERE person_id = '{personId}'", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                if(reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    var value = reader.GetValue(0);
-                    personGender = value.ToString();
+                    if (reader.Read())
+                    {
+                        var value = reader.GetValue(0);
+                        personGender = value.ToString();
+                    }
                 }
-                await _connection.CloseAsync();
                 if (string.IsNullOrEmpty(personGender))
                 {
                     throw new Exception($"Problem in getting person gender for {personId}");
@@ -328,6 +304,10 @@ namespace MaHakesherServerSide.Controllers
             {
                 Console.Write(ex.Message);
             }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
             return string.Empty;
         }
 
@@ -336,18 +316,18 @@ namespace MaHakesherServerSide.Controllers
             string? personName = null;
             try
             {
-                await _connection.CloseAsync();
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT person_name " +
                     $"FROM mahakesher.person " +
                     $"WHERE person_id = '{personId}'", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                if (reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    var value = reader.GetValue(0);
-                    personName = value.ToString();
+                    if (reader.Read())
+                    {
+                        var value = reader.GetValue(0);
+                        personName = value.ToString();
+                    }
                 }
-                await _connection.CloseAsync();
                 if (string.IsNullOrEmpty(personName))
                 {
                     throw new Exception($"Problem in getting person name for {personId}");
@@ -357,6 +337,10 @@ namespace MaHakesherServerSide.Controllers
             catch (Exception ex)
             {
                 Console.Write(ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
             }
             return string.Empty;
         }
@@ -378,22 +362,25 @@ namespace MaHakesherServerSide.Controllers
         {
             try
             {
-                await _connection.CloseAsync();
+                string value = "";
                 await _connection.OpenAsync();
                 using var command = new MySqlCommand($"SELECT {columnName} FROM {tableName} ORDER BY RAND ( )  LIMIT 1;", _connection);
-                using var reader = await command.ExecuteReaderAsync();
-                if (reader.Read())
+                using (var reader = await command.ExecuteReaderAsync())
                 {
-                    string value = reader.GetValue(0).ToString();
-                    await _connection.CloseAsync();
-                    return value;
+                    if (reader.Read())
+                    {
+                        value = reader.GetValue(0).ToString();
+                    }
                 }
-
+                return value;
             }
             catch (Exception ex)
             {
-                await _connection.CloseAsync();
                 Console.Write(ex.Message);
+            }
+            finally
+            {
+                await _connection.CloseAsync();
             }
             return null;
         }
