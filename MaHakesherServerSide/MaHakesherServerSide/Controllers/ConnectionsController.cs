@@ -152,7 +152,9 @@ namespace MaHakesherServerSide.Controllers
             if (difficultyLevel < 2) difficultyLevel = 2;
 
             Dictionary<string, string> playDictionary = new Dictionary<string, string>();
-            string person = await GetRandomPersonId();
+            //string person = await GetRandomPersonId();
+            string person = "Levi_1";
+
             playDictionary.Add(person, $"Start $$${await GetGenderFromPersonId(person)}");
 
             List<string> personsInRoad = new List<string>(); 
@@ -209,14 +211,18 @@ namespace MaHakesherServerSide.Controllers
             }
 
             List<string>? mentionInPersonLifeTime = await GetPeopleThatMentionsInPersonLifeTime(personId);
-            mentionInPersonLifeTime.ForEach(async (person) =>
+            if (mentionInPersonLifeTime != null)
             {
-                if (!connections.ContainsKey(person))
+
+                foreach (string person in mentionInPersonLifeTime)
                 {
-                    connections.Add(person, $"Mentioned in {primaryPersonName} life time $$${await GetGenderFromPersonId(person)}");
+                    if (!connections.ContainsKey(person))
+                    {
+                        connections.Add(person, $"Mentioned in {primaryPersonName} life time $$${await GetGenderFromPersonId(person)}");
+                    }
                 }
-            });
-            
+            }
+
             Dictionary<string, string>? mentionInSameVerse = await GetPeopleThatMentionInTheSameVerse(personId);
             if (mentionInSameVerse != null)
             {
