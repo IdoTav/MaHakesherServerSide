@@ -152,9 +152,7 @@ namespace MaHakesherServerSide.Controllers
             if (difficultyLevel < 2) difficultyLevel = 2;
 
             Dictionary<string, string> playDictionary = new Dictionary<string, string>();
-            //string person = await GetRandomPersonId();
-            string person = "Levi_1";
-
+            string person = await GetRandomPersonId();
             playDictionary.Add(person, $"Start $$${await GetGenderFromPersonId(person)}");
 
             List<string> personsInRoad = new List<string>(); 
