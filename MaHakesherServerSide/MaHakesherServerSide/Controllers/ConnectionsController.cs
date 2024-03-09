@@ -71,7 +71,7 @@ namespace MaHakesherServerSide.Controllers
                                                      $"    MAX( " +
                                                      $"      (SELECT verse_sequence " +
                                                      $"      FROM mahakesher.bibledata_reference " +
-                                                     $"      WHERE reference_id = e.period_length_reference_id) " +
+                                                     $"      WHERE reference_id = e.end_year_reference_id) " +
                                                      $"    ) AS end_value" +
                                                      $"  FROM mahakesher.epoch e" +
                                                      $"  JOIN mahakesher.person_verse pv ON e.person_id = pv.person_id" +
